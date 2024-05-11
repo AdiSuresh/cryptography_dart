@@ -1,0 +1,10 @@
+name: cryptography_dart
+description: High-level APIs over pointycastle to learn about cryptography.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.2.0 <4.0.0"
+
+dependencies:
+  pointycastle: ^3.9.1

@@ -74,31 +74,6 @@ class ECCipher {
     );
   }
 
-  Uint8List deriveKeyTest(
-    ECPublicKey publicKey, [
-    int keySize = 32,
-  ]) {
-    assert(const [128, 192, 256].contains(keySize * 8));
-    final derivator = ECDHKeyDerivator()
-      ..init(
-        ECDHKDFParameters(
-          privateKey,
-          publicKey,
-        ),
-      );
-    final result = Uint8List(32);
-    derivator.deriveKey(
-      Uint8List(0),
-      0,
-      result,
-      0,
-    );
-    return result.sublist(
-      0,
-      keySize,
-    );
-  }
-
   bool verifySignature(
     String message,
     ECSignature signature,

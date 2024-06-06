@@ -85,6 +85,7 @@ class AesCipher {
   AESDecryptedData<Uint8List> decrypt(
     AESEncryptedData<Uint8List> cipherText,
   ) {
+    assert(128 == cipherText.iv.length * 8);
     final value = _performCipher(
       cipherText.iv,
       cipherText.value,
@@ -129,7 +130,7 @@ class AesCipher {
     Uint8List paddedText, [
     bool forEncryption = true,
   ]) {
-    final cbc = CBCBlockCipher(
+    final cipher = CBCBlockCipher(
       AESEngine(),
     )..init(
         forEncryption,
@@ -140,19 +141,8 @@ class AesCipher {
           iv,
         ),
       );
-    final result = Uint8List(
-      paddedText.length,
+    return cipher.process(
+      paddedText,
     );
-    var offset = 0;
-    while (offset < paddedText.length) {
-      offset += cbc.processBlock(
-        paddedText,
-        offset,
-        result,
-        offset,
-      );
-    }
-    assert(offset == paddedText.length);
-    return result;
   }
 }

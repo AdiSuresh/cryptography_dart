@@ -141,8 +141,19 @@ class AesCipher {
           iv,
         ),
       );
-    return cipher.process(
-      paddedText,
+    final result = Uint8List(
+      paddedText.length,
     );
+    var offset = 0;
+    while (offset < paddedText.length) {
+      offset += cipher.processBlock(
+        paddedText,
+        offset,
+        result,
+        offset,
+      );
+    }
+    assert(offset == paddedText.length);
+    return result;
   }
 }

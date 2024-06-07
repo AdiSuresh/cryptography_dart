@@ -61,22 +61,20 @@ class ECCipher {
           publicKey,
         ),
       );
-    final result = Uint8List(32);
-    derivator.deriveKey(
-      Uint8List(0),
-      0,
-      result,
-      0,
-    );
-    return result.sublist(
-      0,
-      keySize,
-    );
+    return derivator
+        .process(
+          Uint8List(32),
+        )
+        .sublist(
+          0,
+          keySize,
+        );
   }
 
   bool verifySignature(
     String message,
     ECSignature signature,
+    ECPublicKey publicKey,
   ) {
     final signer = ECDSASigner(
       SHA256Digest(),

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-abstract class AESCipherData<T extends Object> {
+sealed class AESCipherData<T extends Object> {
   final T value;
 
   const AESCipherData({

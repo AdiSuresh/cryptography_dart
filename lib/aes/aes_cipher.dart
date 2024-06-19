@@ -48,14 +48,14 @@ class AesCipher {
   AESEncryptedData<Uint8List> encrypt(
     String text,
   ) {
-    final iv = _prng.nextBytes(16);
-    final value = _performCipher(
-      iv,
-      _pad(
-        utf8.encode(
-          text,
+    final (iv, value) = _performCipher(
+      AESDecryptedData(
+        value: _pad(
+          utf8.encode(
+            text,
+          ),
+          16,
         ),
-        16,
       ),
     );
     return AESEncryptedData(
@@ -86,10 +86,8 @@ class AesCipher {
     AESEncryptedData<Uint8List> cipherText,
   ) {
     assert(128 == cipherText.iv.length * 8);
-    final value = _performCipher(
-      cipherText.iv,
-      cipherText.value,
-      false,
+    final (_, value) = _performCipher(
+      cipherText,
     );
     return AESDecryptedData(
       value: value,
@@ -125,11 +123,13 @@ class AesCipher {
     );
   }
 
-  Uint8List _performCipher(
-    Uint8List iv,
-    Uint8List paddedText, [
-    bool forEncryption = true,
-  ]) {
+  (Uint8List, Uint8List) _performCipher(
+    AESCipherData<Uint8List> data,
+  ) {
+    final (forEncryption, iv) = switch (data) {
+      AESEncryptedData<Uint8List> e => (false, e.iv),
+      AESDecryptedData<Uint8List> _ => (true, _prng.nextBytes(16)),
+    };
     final cipher = CBCBlockCipher(
       AESEngine(),
     )..init(
@@ -141,19 +141,20 @@ class AesCipher {
           iv,
         ),
       );
+    final paddedBytes = data.value;
     final result = Uint8List(
-      paddedText.length,
+      paddedBytes.length,
     );
     var offset = 0;
-    while (offset < paddedText.length) {
+    while (offset < paddedBytes.length) {
       offset += cipher.processBlock(
-        paddedText,
+        paddedBytes,
         offset,
         result,
         offset,
       );
     }
-    assert(offset == paddedText.length);
-    return result;
+    assert(offset == paddedBytes.length);
+    return (iv, result);
   }
 }

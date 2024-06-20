@@ -25,6 +25,7 @@ class AesCipher {
   final FortunaRandom _prng;
 
   static const keySizes = [128, 192, 256];
+  static const blockSize = 16;
 
   AesCipher({
     required this.key,
@@ -54,7 +55,6 @@ class AesCipher {
           utf8.encode(
             text,
           ),
-          16,
         ),
       ),
     );
@@ -66,9 +66,8 @@ class AesCipher {
 
   Uint8List _pad(
     Uint8List bytes,
-    int blockSizeBytes,
   ) {
-    final padLength = blockSizeBytes - (bytes.length % blockSizeBytes);
+    final padLength = blockSize - (bytes.length % blockSize);
     final padded = Uint8List(
       bytes.length + padLength,
     )..setAll(
@@ -128,7 +127,7 @@ class AesCipher {
   ) {
     final (forEncryption, iv) = switch (data) {
       AESEncryptedData<Uint8List> e => (false, e.iv),
-      AESDecryptedData<Uint8List> _ => (true, _prng.nextBytes(16)),
+      AESDecryptedData<Uint8List> _ => (true, _prng.nextBytes(blockSize)),
     };
     final cipher = CBCBlockCipher(
       AESEngine(),

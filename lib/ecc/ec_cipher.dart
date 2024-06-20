@@ -5,6 +5,8 @@ import 'package:pointycastle/export.dart';
 import 'package:pointycastle/key_derivators/ecdh_kdf.dart';
 
 class ECCipher {
+  static ECDomainParameters get domainParameters => ECCurve_prime256v1();
+
   final ECPrivateKey privateKey;
   final ECPublicKey publicKey;
   final FortunaRandom _prng;

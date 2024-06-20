@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:cryptography_dart/ecc/ec_cipher.dart';
 import 'package:pointycastle/export.dart';
 
 class CipherUtils {
@@ -30,9 +31,7 @@ class CipherUtils {
       ..init(
         ParametersWithRandom(
           ECKeyGeneratorParameters(
-            ECDomainParameters(
-              'prime256v1',
-            ),
+            ECCipher.domainParameters,
           ),
           prng,
         ),

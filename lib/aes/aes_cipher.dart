@@ -21,11 +21,11 @@ extension AesKeySizeExtension on AesKeySize {
 }
 
 class AesCipher {
-  final Uint8List key;
-  final FortunaRandom _prng;
-
   static const keySizes = [128, 192, 256];
   static const blockSize = 16;
+
+  final Uint8List key;
+  final FortunaRandom _prng;
 
   AesCipher({
     required this.key,
@@ -35,8 +35,9 @@ class AesCipher {
 
   factory AesCipher.fresh({
     AesKeySize keySize = AesKeySize.aes256,
+    FortunaRandom? prng,
   }) {
-    final prng = CipherUtils.createFortunaPRNG();
+    prng ??= CipherUtils.createFortunaPRNG();
     final result = AesCipher(
       key: prng.nextBytes(
         keySize.value ~/ 8,
@@ -84,7 +85,7 @@ class AesCipher {
   AESDecryptedData<Uint8List> decrypt(
     AESEncryptedData<Uint8List> cipherText,
   ) {
-    assert(128 == cipherText.iv.length * 8);
+    assert(cipherText.iv.length == blockSize);
     final (_, value) = _performCipher(
       cipherText,
     );

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cryptography_dart/aes/aes_cipher.dart';
 import 'package:cryptography_dart/cipher_utils.dart';
@@ -44,8 +45,8 @@ class ECCipher {
         ),
       );
     final result = signer.generateSignature(
-      Uint8List.fromList(
-        message.codeUnits,
+      utf8.encode(
+        message,
       ),
     ) as ECSignature;
     return result;
@@ -87,8 +88,8 @@ class ECCipher {
         ),
       );
     final result = signer.verifySignature(
-      Uint8List.fromList(
-        message.codeUnits,
+      utf8.encode(
+        message,
       ),
       signature,
     );

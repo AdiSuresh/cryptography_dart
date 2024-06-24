@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:cryptography_dart/aes/aes_cipher.dart';
+import 'package:cryptography_dart/aes/aes_cipher_base.dart';
 import 'package:cryptography_dart/cipher_utils.dart';
 import 'package:pointycastle/export.dart';
 import 'package:pointycastle/key_derivators/ecdh_kdf.dart';
@@ -56,7 +56,7 @@ class ECCipher {
     ECPublicKey publicKey, [
     int keySize = 32,
   ]) {
-    assert(AesCipher.keySizes.contains(keySize * 8));
+    assert(AesCipherBase.keySizes.contains(keySize * 8));
     final derivator = ECDHKeyDerivator()
       ..init(
         ECDHKDFParameters(

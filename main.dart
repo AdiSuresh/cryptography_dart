@@ -1,19 +1,23 @@
-import 'package:cryptography_dart/aes/aes_cipher.dart';
+import 'dart:convert';
+import 'package:cryptography_dart/aes/aes_cbc_cipher.dart';
 
 void main(List<String> args) {
   const testcases = [
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
   ];
-  final cipher = AesCipher.fresh();
+  final cipher = AesCbcCipher.fresh();
   final t1 = DateTime.now();
   for (var i = 0; i < 1; i++) {
-    for (var message in testcases) {
+    for (final message in testcases) {
+      print('message: ${utf8.encode(message)}');
       final encrypted = cipher.encrypt(
         message,
       );
-      final _ = cipher.decryptToString(
+      print('encrypted.value: ${encrypted.value}');
+      final decrypted = cipher.decrypt(
         encrypted,
       );
+      print('decrypted.value: ${decrypted.value}');
     }
   }
   final t2 = DateTime.now();

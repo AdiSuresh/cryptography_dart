@@ -2,55 +2,28 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cryptography_dart/aes/aes_cipher_data.dart';
 import 'package:cryptography_dart/cipher_utils.dart';
+import 'package:meta/meta.dart';
 import 'package:pointycastle/export.dart';
 
-enum AesKeySize {
-  aes128,
-  aes192,
-  aes256,
-}
-
-extension AesKeySizeExtension on AesKeySize {
-  int get value {
-    return switch (this) {
-      AesKeySize.aes128 => 128,
-      AesKeySize.aes192 => 192,
-      AesKeySize.aes256 => 256,
-    };
-  }
-}
-
-class AesCipher {
+abstract class AesCipherBase {
   static const keySizes = [128, 192, 256];
   static const blockSize = 16;
 
   final Uint8List key;
-  final FortunaRandom _prng;
 
-  AesCipher({
+  @protected
+  final FortunaRandom prng;
+
+  AesCipherBase({
     required this.key,
     FortunaRandom? prng,
   })  : assert(keySizes.contains(key.length * 8)),
-        _prng = prng ?? CipherUtils.createFortunaPRNG();
-
-  factory AesCipher.fresh({
-    AesKeySize keySize = AesKeySize.aes256,
-    FortunaRandom? prng,
-  }) {
-    prng ??= CipherUtils.createFortunaPRNG();
-    final result = AesCipher(
-      key: prng.nextBytes(
-        keySize.value ~/ 8,
-      ),
-      prng: prng,
-    );
-    return result;
-  }
+        prng = prng ?? CipherUtils.createFortunaPRNG();
 
   AESEncryptedData<Uint8List> encrypt(
     String text,
   ) {
-    final (iv, value) = _performCipher(
+    final (iv, value) = performCipher(
       AESDecryptedData(
         value: _pad(
           utf8.encode(
@@ -86,7 +59,7 @@ class AesCipher {
     AESEncryptedData<Uint8List> cipherText,
   ) {
     assert(cipherText.iv.length == blockSize);
-    final (_, value) = _performCipher(
+    final (_, value) = performCipher(
       cipherText,
     );
     return AESDecryptedData(
@@ -123,38 +96,26 @@ class AesCipher {
     );
   }
 
-  (Uint8List, Uint8List) _performCipher(
+  @protected
+  (bool, Uint8List) preProcess(
     AESCipherData<Uint8List> data,
   ) {
-    final (forEncryption, iv) = switch (data) {
-      AESEncryptedData<Uint8List> e => (false, e.iv),
-      AESDecryptedData<Uint8List> _ => (true, _prng.nextBytes(blockSize)),
-    };
-    final cipher = CBCBlockCipher(
-      AESEngine(),
-    )..init(
-        forEncryption,
-        ParametersWithIV(
-          KeyParameter(
-            key,
-          ),
-          iv,
+    return switch (data) {
+      AESEncryptedData<Uint8List> e => (
+          false,
+          e.iv,
         ),
-      );
-    final paddedBytes = data.value;
-    final result = Uint8List(
-      paddedBytes.length,
-    );
-    var offset = 0;
-    while (offset < paddedBytes.length) {
-      offset += cipher.processBlock(
-        paddedBytes,
-        offset,
-        result,
-        offset,
-      );
-    }
-    assert(offset == paddedBytes.length);
-    return (iv, result);
+      AESDecryptedData<Uint8List> _ => (
+          true,
+          prng.nextBytes(
+            blockSize,
+          ),
+        ),
+    };
   }
+
+  @protected
+  (Uint8List, Uint8List) performCipher(
+    AESCipherData<Uint8List> data,
+  );
 }
